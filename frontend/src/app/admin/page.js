@@ -17,11 +17,11 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     try {
       const [statsRes, salesRes, aiRes, ordersRes, alertRes] = await Promise.all([
-        fetch('http://localhost:5000/api/admin-stats'),
-        fetch('http://localhost:5000/api/sales-stats'),
-        fetch('http://localhost:5000/api/ai-forecast'),
-        fetch('http://localhost:5000/api/orders'),
-        fetch('http://localhost:5000/api/inventory/alerts') // Fetching low stock alerts
+        fetch('https://tech-smart-inventory-production.up.railway.app/api/admin-stats'),
+        fetch('https://tech-smart-inventory-production.up.railway.app/api/sales-stats'),
+        fetch('https://tech-smart-inventory-production.up.railway.app/api/ai-forecast'),
+        fetch('https://tech-smart-inventory-production.up.railway.app/api/orders'),
+        fetch('https://tech-smart-inventory-production.up.railway.app/api/inventory/alerts') // Fetching low stock alerts
       ]);
 
       setStats(await statsRes.json());
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
 
   const updateStatus = async (orderId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+      const res = await fetch(`https://tech-smart-inventory-production.up.railway.app/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })

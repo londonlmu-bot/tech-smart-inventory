@@ -25,7 +25,7 @@ export default function InventoryPage() {
 
   // Fetch all hardware components from the Backend API
   const fetchProducts = () => {
-    fetch('http://localhost:5000/api/products')
+    fetch('https://tech-smart-inventory-production.up.railway.app/api/products')
       .then(res => {
         if (!res.ok) throw new Error("Network response was not ok");
         return res.json();
@@ -93,7 +93,7 @@ export default function InventoryPage() {
     if (selectedFile) formData.append('image', selectedFile);
 
     try {
-      const response = await fetch('http://localhost:5000/api/products', {
+      const response = await fetch('https://tech-smart-inventory-production.up.railway.app/api/products', {
         method: 'POST',
         body: formData
       });
@@ -123,7 +123,7 @@ export default function InventoryPage() {
     if (editFile) formData.append('image', editFile);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/products/${editingProduct.id}`, {
+      const response = await fetch(`https://tech-smart-inventory-production.up.railway.app/api/products/${editingProduct.id}`, {
         method: 'PUT',
         body: formData
       });
@@ -145,7 +145,7 @@ export default function InventoryPage() {
   const handleDelete = async (id) => {
     if (window.confirm("CRITICAL WARNING: Terminate this item from MSI Inventory?")) {
       try {
-        const response = await fetch(`http://localhost:5000/api/products/${id}`, { method: 'DELETE' });
+        const response = await fetch(`https://tech-smart-inventory-production.up.railway.app/api/products/${id}`, { method: 'DELETE' });
         if(response.ok) fetchProducts();
       } catch (err) { alert("Constraint Failure: Item is currently linked to orders."); }
     }

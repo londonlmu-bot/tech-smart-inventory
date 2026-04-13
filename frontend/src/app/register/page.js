@@ -35,7 +35,7 @@ export default function RegisterPage() {
 
     try {
       // Dispatching data to MSI Personnel Registry API
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('https://tech-smart-inventory-production.up.railway.app/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

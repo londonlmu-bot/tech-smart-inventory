@@ -31,9 +31,9 @@ export default function ProfilePage() {
       try {
         // Parallel fetching for optimal terminal performance
         const [ordersRes, wishlistRes, newRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/user-orders/${userData.id}`),
-          fetch(`http://localhost:5000/api/wishlist/${userData.id}`),
-          fetch(`http://localhost:5000/api/products/new`)
+          fetch(`https://tech-smart-inventory-production.up.railway.app/api/user-orders/${userData.id}`),
+          fetch(`https://tech-smart-inventory-production.up.railway.app/api/wishlist/${userData.id}`),
+          fetch(`https://tech-smart-inventory-production.up.railway.app/api/products/new`)
         ]);
 
         // Safety Protocol: Ensure we only parse if response is valid JSON
@@ -60,7 +60,7 @@ export default function ProfilePage() {
    */
   const removeFromWishlist = async (productId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/wishlist/${user.id}/${productId}`, { 
+      const res = await fetch(`https://tech-smart-inventory-production.up.railway.app/api/wishlist/${user.id}/${productId}`, { 
         method: 'DELETE' 
       });
       if (res.ok) {

@@ -12,7 +12,7 @@ export default function OrdersPage() {
 
   // Synchronizes administrative order logs from the backend
   const fetchOrders = () => {
-    fetch('http://localhost:5000/api/orders')
+    fetch('https://tech-smart-inventory-production.up.railway.app/api/orders')
       .then(res => {
         if (!res.ok) throw new Error("Failed to establish data stream");
         return res.json();
@@ -37,7 +37,7 @@ export default function OrdersPage() {
    */
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+      const response = await fetch(`https://tech-smart-inventory-production.up.railway.app/api/orders/${orderId}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })

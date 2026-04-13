@@ -16,7 +16,7 @@ export default function AIForecastPage() {
 
   // Syncing with MSI Intelligence Matrix (Backend API)
   useEffect(() => {
-    fetch('http://localhost:5000/api/ai-forecast')
+    fetch('https://tech-smart-inventory-production.up.railway.app/api/ai-forecast')
       .then(res => res.json())
       .then(data => {
         const results = Array.isArray(data.product_predictions) ? data.product_predictions : [];

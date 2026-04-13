@@ -50,7 +50,7 @@ export default function CartPage() {
     try {
       // Iterative processing of each hardware component
       for (const item of cart) {
-        await fetch('http://localhost:5000/api/checkout', {
+        await fetch('https://tech-smart-inventory-production.up.railway.app/api/checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

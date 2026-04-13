@@ -52,7 +52,7 @@ export default function HomePage() {
   // Fetch product catalog from backend API
   const fetchProducts = () => {
     setLoading(true);
-    fetch('http://localhost:5000/api/products')
+    fetch('https://tech-smart-inventory-production.up.railway.app/api/products')
       .then((res) => res.json())
       .then((data) => {
         setProducts(Array.isArray(data) ? data : []);
@@ -67,7 +67,7 @@ export default function HomePage() {
 
   // Fetch user's wishlist from database (FIXED LOGIC)
   const fetchWishlist = (userId) => {
-    fetch(`http://localhost:5000/api/wishlist/${userId}`)
+    fetch(`https://tech-smart-inventory-production.up.railway.app/api/wishlist/${userId}`)
       .then(res => res.json())
       .then(data => {
         // Validation logic to ensure data is a valid array before mapping
@@ -93,8 +93,8 @@ export default function HomePage() {
     const isExisting = wishlist.includes(productId);
     const method = isExisting ? 'DELETE' : 'POST';
     const url = isExisting 
-        ? `http://localhost:5000/api/wishlist/${user.id}/${productId}`
-        : 'http://localhost:5000/api/wishlist';
+        ? `https://tech-smart-inventory-production.up.railway.app/api/wishlist/${user.id}/${productId}`
+        : 'https://tech-smart-inventory-production.up.railway.app/api/wishlist';
 
     try {
         const response = await fetch(url, {
