@@ -234,7 +234,7 @@ app.get('/api/products', async (req, res) => {
 
 app.post('/api/products', upload.single('image'), async (req, res) => {
     const { name, price, stock_quantity, min_stock_level, description } = req.body;
-    const image_url = req.file ? `https://tech-smart-inventory-production.up.railway.app/uploads/${req.file.filename}` : null;
+    const image_url = req.file ? `http://localhost:5000/uploads/${req.file.filename}` : null;
     try {
         await pool.query(
             'INSERT INTO products (name, price, stock_quantity, min_stock_level, description, image_url, category_id) VALUES ($1, $2, $3, $4, $5, $6, 1)', 
@@ -249,7 +249,7 @@ app.put('/api/products/:id', upload.single('image'), async (req, res) => {
     const { name, price, stock_quantity, min_stock_level } = req.body;
     try {
         if (req.file) {
-            const image_url = `https://tech-smart-inventory-production.up.railway.app/uploads/${req.file.filename}`;
+            const image_url = `http://localhost:5000/uploads/${req.file.filename}`;
             await pool.query('UPDATE products SET name=$1, price=$2, stock_quantity=$3, min_stock_level=$4, image_url=$5 WHERE id=$6', [name, price, stock_quantity, min_stock_level, image_url, id]);
         } else {
             await pool.query('UPDATE products SET name=$1, price=$2, stock_quantity=$3, min_stock_level=$4 WHERE id=$5', [name, price, stock_quantity, min_stock_level, id]);

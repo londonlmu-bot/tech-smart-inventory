@@ -1,5 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+// Importing Framer Motion for global layout animations
+import * as motion from "framer-motion/client";
 
 // --- Font Orchestration: Configuring MSI-style sleek typography ---
 const geistSans = Geist({
@@ -14,7 +16,7 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-// --- System Metadata: Core SEO for MSI Smart Inventory ---
+// --- System Metadata: Core SEO for TECH Smart Inventory ---
 export const metadata = {
   title: "TECH Smart Inventory | High-Performance Hardware Terminal",
   description: "Advanced management portal for MSI hardware, components, and high-end gaming laptops.",
@@ -37,10 +39,13 @@ export default function RootLayout({ children }) {
         
         {/* Main Application Container */}
         <div className="flex-1 flex flex-col relative overflow-x-hidden">
-          {/* Global Background Glow: Added a subtle fixed glow to the background 
-            to enhance the "Genesis" aesthetic across all pages.
-          */}
-          <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(220,38,38,0.03),_transparent_70%)] pointer-events-none z-0"></div>
+          {/* Global Background Glow: Animated subtle fixed glow to enhance the "Genesis" aesthetic */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 2 }}
+            className="fixed inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(220,38,38,0.03),_transparent_70%)] pointer-events-none z-0"
+          ></motion.div>
           
           <main className="relative z-10 flex-1 flex flex-col">
             {children}

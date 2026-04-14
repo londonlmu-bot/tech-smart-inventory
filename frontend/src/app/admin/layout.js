@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+// Importing Framer Motion for sidebar transitions and content orchestration
+import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * AdminLayout Component
@@ -67,7 +69,12 @@ export default function AdminLayout({ children }) {
     <div className="flex h-screen bg-black text-white font-sans overflow-hidden">
       
       {/* --- 🛡️ MSI INTELLIGENCE SIDEBAR --- */}
-      <aside className="w-72 border-r border-white/5 bg-gray-950 flex flex-col h-full shadow-2xl z-50 relative">
+      <motion.aside 
+        initial={{ x: -100, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-72 border-r border-white/5 bg-gray-950 flex flex-col h-full shadow-2xl z-50 relative"
+      >
         <div className="absolute top-0 right-0 w-[1px] h-full bg-gradient-to-b from-transparent via-red-600/20 to-transparent"></div>
         
         {/* Unit Branding Container */}
@@ -89,16 +96,21 @@ export default function AdminLayout({ children }) {
               <Link 
                 key={item.path} 
                 href={item.path}
-                className={`group flex items-center px-6 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] transition-all duration-500 border border-transparent ${
-                  isActive 
-                  ? 'bg-red-600 text-white shadow-xl shadow-red-900/30 border-red-500' 
-                  : 'text-gray-500 hover:bg-white/5 hover:text-white hover:border-white/5'
-                }`}
               >
-                <div className="flex items-center space-x-3">
-                  {isActive && <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>}
-                  <span>{item.name}</span>
-                </div>
+                <motion.div 
+                  whileHover={{ x: 5 }} // Subtle slide effect on hover
+                  whileTap={{ scale: 0.98 }}
+                  className={`group flex items-center px-6 py-4 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] transition-all duration-500 border border-transparent cursor-pointer ${
+                    isActive 
+                    ? 'bg-red-600 text-white shadow-xl shadow-red-900/30 border-red-500' 
+                    : 'text-gray-500 hover:bg-white/5 hover:text-white hover:border-white/5'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    {isActive && <motion.div layoutId="activeDot" className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></motion.div>}
+                    <span>{item.name}</span>
+                  </div>
+                </motion.div>
               </Link>
             );
           })}
@@ -106,29 +118,40 @@ export default function AdminLayout({ children }) {
 
         {/* 🔴 SECURE PROTOCOL TERMINATION */}
         <div className="p-8 border-t border-white/5 bg-black/60">
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleLogout}
             className="w-full flex items-center justify-center space-x-3 bg-gray-900 hover:bg-red-600 hover:text-white text-gray-400 py-4 rounded-xl font-black uppercase text-[9px] tracking-widest transition-all duration-500 border border-white/5 group shadow-lg"
           >
             <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span>
             <span>Secure Logout</span>
-          </button>
+          </motion.button>
           <div className="mt-8 text-center opacity-30 group">
              <p className="text-[8px] text-gray-500 uppercase tracking-[0.5em] font-black group-hover:text-red-600 transition-colors">
                TECH Intelligence OS 
              </p>
           </div>
         </div>
-      </aside>
+      </motion.aside>
 
       {/* --- 💻 COMMAND WORKSPACE (MAIN CONTENT) --- */}
       <main className="flex-1 overflow-y-auto bg-black scrollbar-hide relative">
         {/* Ambient Glow Background Overlay */}
         <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-red-600/5 to-transparent pointer-events-none"></div>
         
-        <div className="max-w-6xl mx-auto p-12 relative z-10">
-          {children}
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div 
+            key={pathname} // Triggers animation on route change
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4 }}
+            className="max-w-6xl mx-auto p-12 relative z-10"
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </main>
     </div>
   );

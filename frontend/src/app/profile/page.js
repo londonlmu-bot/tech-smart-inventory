@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+// Importing Framer Motion for high-fidelity UI transitions and staggered list animations
+import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * ProfilePage Component
@@ -31,9 +33,9 @@ export default function ProfilePage() {
       try {
         // Parallel fetching for optimal terminal performance
         const [ordersRes, wishlistRes, newRes] = await Promise.all([
-          fetch(`https://tech-smart-inventory-production.up.railway.app/api/user-orders/${userData.id}`),
-          fetch(`https://tech-smart-inventory-production.up.railway.app/api/wishlist/${userData.id}`),
-          fetch(`https://tech-smart-inventory-production.up.railway.app/api/products/new`)
+          fetch(`http://localhost:5000/api/user-orders/${userData.id}`),
+          fetch(`http://localhost:5000/api/wishlist/${userData.id}`),
+          fetch(`http://localhost:5000/api/products/new`)
         ]);
 
         // Safety Protocol: Ensure we only parse if response is valid JSON
@@ -60,7 +62,7 @@ export default function ProfilePage() {
    */
   const removeFromWishlist = async (productId) => {
     try {
-      const res = await fetch(`https://tech-smart-inventory-production.up.railway.app/api/wishlist/${user.id}/${productId}`, { 
+      const res = await fetch(`http://localhost:5000/api/wishlist/${user.id}/${productId}`, { 
         method: 'DELETE' 
       });
       if (res.ok) {
@@ -71,10 +73,28 @@ export default function ProfilePage() {
     }
   };
 
+  // Animation Variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
+  };
+
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-red-600 pb-20">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="min-h-screen bg-black text-white font-sans selection:bg-red-600 pb-20"
+    >
       
       {/* --- TACTICAL NAVIGATION --- */}
       <nav className="p-8 border-b border-white/5 flex justify-between items-center backdrop-blur-2xl sticky top-0 z-50 bg-black/60">
@@ -89,27 +109,37 @@ export default function ProfilePage() {
         </Link>
       </nav>
 
-      <main className="max-w-6xl mx-auto py-16 px-6 space-y-20">
+      <motion.main 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-6xl mx-auto py-16 px-6 space-y-20"
+      >
         
         {/* --- 👤 USER PROFILE MODULE --- */}
-        <div className="relative group">
+        <motion.div variants={itemVariants} className="relative group">
           <div className="absolute -inset-1 bg-gradient-to-r from-red-600 to-transparent rounded-[2.5rem] blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
           <div className="relative bg-gray-950 p-10 md:p-14 rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row items-center md:space-x-12 shadow-2xl overflow-hidden">
-            <div className="w-32 h-32 bg-red-600 rounded-2xl flex items-center justify-center text-5xl font-black rotate-3 shadow-2xl shadow-red-900/40 border-4 border-black mb-8 md:mb-0">
+            <motion.div 
+              initial={{ scale: 0.8, rotate: -10 }}
+              animate={{ scale: 1, rotate: 3 }}
+              transition={{ duration: 0.8, type: "spring" }}
+              className="w-32 h-32 bg-red-600 rounded-2xl flex items-center justify-center text-5xl font-black shadow-2xl shadow-red-900/40 border-4 border-black mb-8 md:mb-0"
+            >
               {user.name ? user.name[0].toUpperCase() : 'U'}
-            </div>
+            </motion.div>
             <div className="text-center md:text-left space-y-2">
               <h1 className="text-5xl font-black uppercase italic tracking-tighter">{user.name}</h1>
               <p className="text-[10px] text-red-500 font-black uppercase tracking-[0.5em]">{user.role} // ACCESS LEVEL VERIFIED</p>
               <p className="text-sm text-gray-500 font-medium opacity-60 tracking-wider">{user.email}</p>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
           
           {/* --- 📦 ACQUISITION LOGS --- */}
-          <div className="lg:col-span-2 space-y-10">
+          <motion.div variants={itemVariants} className="lg:col-span-2 space-y-10">
             <h2 className="text-xl font-black uppercase tracking-[0.2em] flex items-center">
               <span className="w-8 h-[2px] bg-red-600 mr-4 shadow-[0_0_10px_#dc2626]"></span> Acquisition Logs
             </h2>
@@ -120,8 +150,14 @@ export default function ProfilePage() {
               ) : orders.length === 0 ? (
                 <div className="p-16 border border-dashed border-white/10 rounded-[2rem] text-center opacity-30 italic text-xs uppercase tracking-[0.5em]">No transaction logs detected.</div>
               ) : (
-                orders.map(order => (
-                  <div key={order.id} className="bg-gray-900/40 p-8 rounded-[2.5rem] border border-white/5 group hover:border-red-600/40 transition-all duration-500 shadow-xl">
+                orders.map((order, i) => (
+                  <motion.div 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    key={order.id} 
+                    className="bg-gray-900/40 p-8 rounded-[2.5rem] border border-white/5 group hover:border-red-600/40 transition-all duration-500 shadow-xl"
+                  >
                     <div className="flex flex-col md:flex-row justify-between items-start mb-8 gap-4">
                       <div>
                         <p className="text-[9px] text-gray-600 font-black uppercase mb-1 tracking-widest">Log REF: #ORD-{String(order.id).padStart(5, '0')}</p>
@@ -145,32 +181,41 @@ export default function ProfilePage() {
                         </div>
                       ))}
                     </div>
-                  </div>
-                )
-              ))}
+                  </motion.div>
+                ))
+              )}
             </div>
-          </div>
+          </motion.div>
 
           {/* --- 🛠️ TACTICAL SIDEBAR --- */}
-          <div className="space-y-16">
+          <motion.div variants={itemVariants} className="space-y-16">
             
             {/* WISHLIST SECTION (ARRAY PROTECTED) */}
             <div className="space-y-8 bg-white/[0.01] p-6 rounded-[2rem] border border-white/5 shadow-inner">
               <h3 className="text-xs font-black uppercase tracking-[0.4em] text-red-500 border-b border-red-900/20 pb-4">Saved Hardware</h3>
               <div className="space-y-4">
-                {Array.isArray(wishlist) && wishlist.length > 0 ? (
-                  wishlist.map(item => (
-                    <div key={item.id} className="flex items-center justify-between bg-black/40 p-4 rounded-2xl border border-white/5 group hover:border-red-600/20 transition-all">
-                      <div className="flex items-center space-x-4">
-                        <img src={item.image_url} alt="" className="w-10 h-10 object-contain opacity-40 group-hover:opacity-100 transition-opacity" />
-                        <span className="text-[10px] font-black uppercase truncate w-24 tracking-tight group-hover:text-white">{item.name}</span>
-                      </div>
-                      <button onClick={() => removeFromWishlist(item.id)} className="text-[8px] text-gray-700 hover:text-red-500 font-black tracking-tighter transition-colors uppercase">Decouple</button>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-[10px] text-gray-800 uppercase font-black tracking-widest italic py-4 text-center">Wishlist Empty</p>
-                )}
+                <AnimatePresence mode="popLayout">
+                  {Array.isArray(wishlist) && wishlist.length > 0 ? (
+                    wishlist.map(item => (
+                      <motion.div 
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, x: 50 }}
+                        key={item.id} 
+                        className="flex items-center justify-between bg-black/40 p-4 rounded-2xl border border-white/5 group hover:border-red-600/20 transition-all"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <img src={item.image_url} alt="" className="w-10 h-10 object-contain opacity-40 group-hover:opacity-100 transition-opacity" />
+                          <span className="text-[10px] font-black uppercase truncate w-24 tracking-tight group-hover:text-white">{item.name}</span>
+                        </div>
+                        <button onClick={() => removeFromWishlist(item.id)} className="text-[8px] text-gray-700 hover:text-red-500 font-black tracking-tighter transition-colors uppercase">Decouple</button>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] text-gray-800 uppercase font-black tracking-widest italic py-4 text-center">Wishlist Empty</motion.p>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
@@ -180,18 +225,21 @@ export default function ProfilePage() {
               <h3 className="text-xs font-black uppercase tracking-[0.4em] text-red-500 relative z-10">What's New</h3>
               {Array.isArray(newArrivals) && newArrivals.slice(0, 2).map(item => (
                 <Link href="/" key={item.id} className="block group/item relative z-10">
-                  <div className="bg-black/60 p-4 rounded-2xl border border-white/5 group-hover/item:border-red-600/30 transition-all shadow-lg">
+                  <motion.div 
+                    whileHover={{ y: -5 }}
+                    className="bg-black/60 p-4 rounded-2xl border border-white/5 group-hover/item:border-red-600/30 transition-all shadow-lg"
+                  >
                     <img src={item.image_url} alt="" className="w-full h-24 object-contain mb-4 group-hover/item:scale-110 transition duration-700" />
                     <p className="text-[10px] font-black uppercase italic tracking-tighter group-hover/item:text-red-500 transition-colors truncate">{item.name}</p>
                     <p className="text-white font-black text-[9px] mt-2 opacity-30 tracking-[0.2em]">Deploy Now</p>
-                  </div>
+                  </motion.div>
                 </Link>
               ))}
             </div>
 
-          </div>
+          </motion.div>
         </div>
-      </main>
-    </div>
+      </motion.main>
+    </motion.div>
   );
 }

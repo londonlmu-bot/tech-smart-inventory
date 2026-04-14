@@ -26,7 +26,7 @@ const sendStockAlert = async (productName, currentStock) => {
             // Destination: Admin's registered WhatsApp number
             to: `whatsapp:${process.env.ADMIN_PHONE}`, 
             
-            // Strategic Alert Payload (MSI Tactical Theme)
+            // Strategic Alert Payload (TECH Tactical Theme)
             body: `⚠️ *TECH SMART INVENTORY ALERT* \n\n` +
                   `Hardware Identifier: *${productName}*\n` +
                   `Operational Status: *CRITICAL LOW STOCK*\n` +

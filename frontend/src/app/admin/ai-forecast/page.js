@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
+// Importing Framer Motion for smooth UI transitions
+import { motion } from 'framer-motion';
 
 /**
  * AIForecastPage Component
@@ -16,7 +18,7 @@ export default function AIForecastPage() {
 
   // Syncing with MSI Intelligence Matrix (Backend API)
   useEffect(() => {
-    fetch('https://tech-smart-inventory-production.up.railway.app/api/ai-forecast')
+    fetch('http://localhost:5000/api/ai-forecast')
       .then(res => res.json())
       .then(data => {
         const results = Array.isArray(data.product_predictions) ? data.product_predictions : [];
@@ -44,6 +46,24 @@ export default function AIForecastPage() {
     setFilteredForecasts(filtered);
   }, [searchTerm, forecasts]);
 
+  // Framer Motion Animation Variants
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        staggerChildren: 0.1 // Animates children one by one
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.4 } }
+  };
+
   if (loading) return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center space-y-6">
       <div className="relative">
@@ -55,7 +75,13 @@ export default function AIForecastPage() {
   );
 
   return (
-    <div className="p-8 space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-1000">
+    // Wrap main container with motion.div for page entry animation
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="p-8 space-y-10"
+    >
       
       {/* --- COMMAND HEADER --- */}
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-gray-900 pb-12 relative">
@@ -92,27 +118,26 @@ export default function AIForecastPage() {
 
       {/* --- INTELLIGENCE METRICS --- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-white">
-          <div className="bg-gray-900/40 p-8 rounded-[2rem] border border-gray-800 hover:border-red-600/30 transition-all group">
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-gray-900/40 p-8 rounded-[2rem] border border-gray-800 hover:border-red-600/30 transition-all group">
               <p className="text-[9px] text-gray-600 font-black uppercase tracking-[0.3em] mb-3">Projected Throughput</p>
               <div className="flex items-baseline space-x-2">
                 <p className="text-4xl font-black italic">{forecasts.reduce((acc, curr) => acc + curr.predicted_next_month, 0)}</p>
                 <p className="text-xs text-red-600 font-black uppercase">Units</p>
               </div>
-          </div>
-          <div className="bg-gray-900/40 p-8 rounded-[2rem] border border-gray-800 hover:border-green-600/30 transition-all">
+          </motion.div>
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-gray-900/40 p-8 rounded-[2rem] border border-gray-800 hover:border-green-600/30 transition-all">
               <p className="text-[9px] text-gray-600 font-black uppercase tracking-[0.3em] mb-3">Model Accuracy R2</p>
-              {/* FIXED: Displaying dynamic accuracy from Backend */}
               <p className="text-4xl font-black italic text-green-500">{accuracy || "0.0"}<span className="text-sm">%</span></p>
-          </div>
-          <div className="bg-red-950/10 p-8 rounded-[2rem] border border-red-900/20 relative overflow-hidden group">
+          </motion.div>
+          <motion.div variants={itemVariants} whileHover={{ scale: 1.02 }} className="bg-red-950/10 p-8 rounded-[2rem] border border-red-900/20 relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-24 h-24 bg-red-600/5 blur-3xl group-hover:bg-red-600/10 transition-all"></div>
               <p className="text-[9px] text-red-600 font-black uppercase tracking-[0.3em] mb-3">Strategic Alert</p>
               <p className="text-xl font-black text-white leading-tight uppercase italic">Inventory Refill Required</p>
-          </div>
+          </motion.div>
       </div>
 
       {/* --- VISUAL PROJECTION TERMINAL --- */}
-      <div className="bg-gray-950 p-10 rounded-[3rem] border border-gray-900 h-[500px] shadow-2xl relative">
+      <motion.div variants={itemVariants} className="bg-gray-950 p-10 rounded-[3rem] border border-gray-900 h-[500px] shadow-2xl relative">
         <div className="flex justify-between items-center mb-12">
             <div>
                 <h2 className="text-xs font-black uppercase text-gray-400 tracking-widest">Hardware Demand Velocity</h2>
@@ -143,10 +168,10 @@ export default function AIForecastPage() {
             <ReferenceLine y={10} stroke="#dc2626" strokeDasharray="3 3" label={{ position: 'right', value: 'CRITICAL', fill: '#dc2626', fontSize: 8, fontWeight: 'bold' }} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </motion.div>
 
       {/* --- COMPONENT INTELLIGENCE LOGS --- */}
-      <div className="bg-gray-900/20 rounded-[3rem] border border-gray-900 overflow-hidden shadow-2xl backdrop-blur-sm text-white">
+      <motion.div variants={itemVariants} className="bg-gray-900/20 rounded-[3rem] border border-gray-900 overflow-hidden shadow-2xl backdrop-blur-sm text-white">
         <table className="w-full text-left">
           <thead className="bg-gray-950/80 text-gray-600 text-[10px] uppercase font-black tracking-[0.3em] border-b border-gray-900">
             <tr>
@@ -181,19 +206,22 @@ export default function AIForecastPage() {
                     <p className="text-[8px] font-black text-gray-600 uppercase mt-2">Score: {Math.min(90 + index, 98)}%</p>
                 </td>
                 <td className="p-10">
-                  <div className={`inline-flex items-center px-6 py-2 rounded-2xl border font-black uppercase text-[9px] tracking-widest ${item.predicted_next_month > 10 ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-900/20' : 'bg-transparent text-gray-500 border-gray-800'}`}>
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`inline-flex items-center px-6 py-2 rounded-2xl border font-black uppercase text-[9px] tracking-widest cursor-pointer ${item.predicted_next_month > 10 ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-900/20' : 'bg-transparent text-gray-500 border-gray-800'}`}>
                     {item.predicted_next_month > 10 ? "Execute Restock" : "Monitor Flow"}
-                  </div>
+                  </motion.div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </motion.div>
 
       <footer className="text-center py-10 opacity-20 hover:opacity-100 transition-opacity">
         <p className="text-gray-500 font-black uppercase text-[8px] tracking-[1em]">© 2026 TECH Intelligence Unit • Neural Sync Stable</p>
       </footer>
-    </div>
+    </motion.div>
   );
 }
