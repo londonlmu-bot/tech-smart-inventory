@@ -12,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
  */
 export default function HomePage() {
   const [products, setProducts] = useState([]);
-  const [wishlist, setWishlist] = useState([]); // Wishlist state added
+  const [wishlist, setWishlist] = useState([]); 
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -38,16 +38,26 @@ export default function HomePage() {
     fetchProducts();
   }, []);
 
-  // Live filtering logic for search and category toggles
+  // --- BUG FIXED: Optimized Filtering Logic ---
+  // Ensuring results are always reset from the master 'products' list
   useEffect(() => {
-    let results = products.filter(p => 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let results = [...products];
+
+    // Filter by search keyword
+    if (searchTerm) {
+      results = results.filter(p => 
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by Category thresholds
     if (selectedCategory === "High-End") {
       results = results.filter(p => parseFloat(p.price) >= 200000);
     } else if (selectedCategory === "Budget") {
       results = results.filter(p => parseFloat(p.price) < 200000);
     }
+    // If "All", it keeps the full results list
+
     setFilteredProducts(results);
   }, [searchTerm, selectedCategory, products]);
 
@@ -57,8 +67,9 @@ export default function HomePage() {
     fetch('http://localhost:5000/api/products')
       .then((res) => res.json())
       .then((data) => {
-        setProducts(Array.isArray(data) ? data : []);
-        setFilteredProducts(Array.isArray(data) ? data : []);
+        const productList = Array.isArray(data) ? data : [];
+        setProducts(productList);
+        setFilteredProducts(productList);
         setLoading(false);
       })
       .catch((err) => {
@@ -67,12 +78,11 @@ export default function HomePage() {
       });
   };
 
-  // Fetch user's wishlist from database (FIXED LOGIC)
+  // Fetch user's wishlist from database
   const fetchWishlist = (userId) => {
     fetch(`http://localhost:5000/api/wishlist/${userId}`)
       .then(res => res.json())
       .then(data => {
-        // Validation logic to ensure data is a valid array before mapping
         if (Array.isArray(data)) {
             setWishlist(data.map(item => item.id));
         } else {
@@ -85,7 +95,7 @@ export default function HomePage() {
       });
   };
 
-  // Toggle wishlist status
+  // Toggle wishlist status via API
   const toggleWishlist = async (productId) => {
     if (!user) {
         alert("SECURITY: Sign in to sync wishlist.");
@@ -113,10 +123,7 @@ export default function HomePage() {
     } catch (err) { console.error("Wishlist Operation Failed:", err); }
   };
 
-  /**
-   * Secure Add to Cart Protocol
-   * Validates user authentication before allowing hardware acquisition.
-   */
+  // Secure Add to Cart Protocol
   const addToCart = (product) => {
     if (!user) {
       alert("SECURITY ACCESS DENIED: Please sign in to acquire gear.");
@@ -131,18 +138,17 @@ export default function HomePage() {
     setTimeout(() => setMessage(""), 2000);
   };
 
-  // Clear local storage and reset session
   const handleLogout = () => {
     localStorage.clear();
     window.location.reload();
   };
 
-  // Helper to scroll to inventory section
   const scrollToProducts = () => {
-    document.getElementById('tactical-inventory').scrollIntoView({ behavior: 'smooth' });
+    const target = document.getElementById('tactical-inventory');
+    if(target) target.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Animation Variants for UI Orchestration
+  // --- Animation Variants ---
   const heroTextVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
@@ -152,13 +158,13 @@ export default function HomePage() {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1, 
-      transition: { staggerChildren: 0.1 } 
+      transition: { staggerChildren: 0.05 } // Quick stagger for smoother feel
     }
   };
 
   const productItemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.4 } }
   };
 
   return (
@@ -176,7 +182,6 @@ export default function HomePage() {
         </motion.div>
         
         <div className="flex items-center space-x-8">
-          {/* CART: Visible only to authenticated users */}
           {user && (
             <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
               <Link href="/cart" className="flex items-center space-x-3 bg-red-600/10 px-5 py-2 rounded-full border border-red-600/30 hover:bg-red-600 transition-all duration-300">
@@ -188,7 +193,6 @@ export default function HomePage() {
 
           {user ? (
             <div className="flex items-center space-x-6 border-l border-white/10 pl-8">
-              {/* Profile access */}
               <Link href="/profile" className="flex flex-col text-right group cursor-pointer">
                 <span className="text-[9px] text-gray-500 font-bold uppercase tracking-widest group-hover:text-red-500 transition-colors">AUTHORIZED AS</span>
                 <span className="text-xs font-black text-white uppercase tracking-tight group-hover:text-red-500 transition-colors">{user.name}</span>
@@ -235,16 +239,10 @@ export default function HomePage() {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="pt-12 flex flex-col md:flex-row items-center justify-center gap-4"
             >
-                <button 
-                  onClick={scrollToProducts}
-                  className="w-64 bg-red-600 text-white py-5 rounded-full font-black uppercase text-[11px] tracking-[0.4em] hover:bg-white hover:text-black hover:scale-105 transition-all duration-500 shadow-xl shadow-red-900/20"
-                >
+                <button onClick={scrollToProducts} className="w-64 bg-red-600 text-white py-5 rounded-full font-black uppercase text-[11px] tracking-[0.4em] hover:bg-white hover:text-black hover:scale-105 transition-all duration-500 shadow-xl shadow-red-900/20">
                   ACQUIRE GEAR
                 </button>
-                <button 
-                  onClick={scrollToProducts}
-                  className="w-64 bg-white text-black py-5 rounded-full font-black uppercase text-[11px] tracking-[0.4em] hover:bg-red-600 hover:text-white hover:scale-105 transition-all duration-500 shadow-xl shadow-white/10"
-                >
+                <button onClick={scrollToProducts} className="w-64 bg-white text-black py-5 rounded-full font-black uppercase text-[11px] tracking-[0.4em] hover:bg-red-600 hover:text-white hover:scale-105 transition-all duration-500 shadow-xl shadow-white/10">
                   PRODUCTS
                 </button>
             </motion.div>
@@ -307,86 +305,90 @@ export default function HomePage() {
           className="flex items-center space-x-6 mb-20"
         >
             <div className="w-12 h-[2px] bg-red-600"></div>
-            <h3 className="text-4xl font-black uppercase italic tracking-tighter italic">Tactical <span className="text-white/20">Inventory</span></h3>
+            <h3 className="text-4xl font-black uppercase italic tracking-tighter">Tactical <span className="text-white/20">Inventory</span></h3>
         </motion.div>
         
         {loading ? (
           <div className="text-center py-40 animate-pulse text-red-600 font-black uppercase tracking-[1.5em] text-[12px] italic">STREAMING DATA...</div>
         ) : (
-          <motion.div 
-            variants={productContainerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
-          >
-            {filteredProducts.map((product) => (
-              <motion.div 
-                variants={productItemVariants}
-                key={product.id} 
-                className="group relative bg-black rounded-[3rem] border border-white/5 overflow-hidden transition-all duration-700 hover:border-red-600/40 hover:translate-y-[-10px]"
-              >
-                <div className="h-80 bg-[#050505] relative overflow-hidden flex items-center justify-center p-16">
-                  
-                  {/* --- ❤️ WISHLIST TOGGLE --- */}
-                  <motion.button 
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => toggleWishlist(product.id)}
-                    className="absolute top-6 right-6 z-30 w-10 h-10 bg-black/50 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center hover:bg-red-600 transition-all shadow-xl"
-                  >
-                    <span className={`text-lg transition-transform duration-300 ${wishlist.includes(product.id) ? 'text-white scale-125' : 'text-gray-500 group-hover:text-white'}`}>
-                        {wishlist.includes(product.id) ? '❤️' : '🤍'}
-                    </span>
-                  </motion.button>
+          // BUG FIX: Wrapped mapping in AnimatePresence with unique keys to prevent render dropouts
+          <AnimatePresence mode='popLayout'>
+            <motion.div 
+              key={selectedCategory} // Unique key ensures smooth transition between states
+              variants={productContainerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"
+            >
+              {filteredProducts.map((product) => (
+                <motion.div 
+                  layout // Enables smooth movement when list changes
+                  variants={productItemVariants}
+                  key={product.id} 
+                  className="group relative bg-black rounded-[3rem] border border-white/5 overflow-hidden transition-all duration-700 hover:border-red-600/40 hover:translate-y-[-10px]"
+                >
+                  <div className="h-80 bg-[#050505] relative overflow-hidden flex items-center justify-center p-16">
+                    
+                    {/* ❤️ WISHLIST TOGGLE */}
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => toggleWishlist(product.id)}
+                      className="absolute top-6 right-6 z-30 w-10 h-10 bg-black/50 backdrop-blur-md rounded-full border border-white/10 flex items-center justify-center hover:bg-red-600 transition-all shadow-xl"
+                    >
+                      <span className={`text-lg transition-transform duration-300 ${wishlist.includes(product.id) ? 'text-white scale-125' : 'text-gray-500 group-hover:text-white'}`}>
+                          {wishlist.includes(product.id) ? '❤️' : '🤍'}
+                      </span>
+                    </motion.button>
 
-                  <div className="absolute inset-0 bg-red-600/0 group-hover:bg-red-600/5 transition-all duration-700"></div>
-                  <motion.img 
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.8 }}
-                    src={product.image_url || 'https://via.placeholder.com/600x400/111/fff?text=MSI+GEAR'} 
-                    alt={product.name} 
-                    className="w-full h-full object-contain relative z-10"
-                  />
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-20">
-                    <span className={`w-2 h-2 rounded-full ${product.stock_quantity > 0 ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-600 shadow-[0_0_10px_#dc2626]'}`}></span>
-                    <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/40">{product.stock_quantity > 0 ? 'UNIT READY' : 'OFFLINE'}</span>
+                    <div className="absolute inset-0 bg-red-600/0 group-hover:bg-red-600/5 transition-all duration-700"></div>
+                    <motion.img 
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.8 }}
+                      src={product.image_url || 'https://via.placeholder.com/600x400/111/fff?text=GEAR'} 
+                      alt={product.name} 
+                      className="w-full h-full object-contain relative z-10"
+                    />
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-20">
+                      <span className={`w-2 h-2 rounded-full ${product.stock_quantity > 0 ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-red-600 shadow-[0_0_10px_#dc2626]'}`}></span>
+                      <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/40">{product.stock_quantity > 0 ? 'UNIT READY' : 'OFFLINE'}</span>
+                    </div>
                   </div>
-                </div>
 
-                <div className="p-12 space-y-8">
-                  <div>
-                    <h4 className="text-2xl font-black uppercase italic tracking-tighter group-hover:text-red-500 transition-colors duration-500">{product.name}</h4>
-                    <p className="text-gray-600 text-[9px] font-black uppercase tracking-[0.4em] mt-3 italic">TECH Hardware Protocol</p>
-                  </div>
-                  <div className="flex justify-between items-center py-8 border-y border-white/5">
+                  <div className="p-12 space-y-8">
                     <div>
-                        <p className="text-[8px] text-white/20 font-black uppercase tracking-widest mb-2">Value</p>
-                        <p className="text-2xl font-black text-white">Rs. {parseFloat(product.price).toLocaleString()}</p>
+                      <h4 className="text-2xl font-black uppercase italic tracking-tighter group-hover:text-red-500 transition-colors duration-500">{product.name}</h4>
+                      <p className="text-gray-600 text-[9px] font-black uppercase tracking-[0.4em] mt-3 italic">TECH Hardware Protocol</p>
                     </div>
-                    <div className="text-right">
-                        <p className="text-[8px] text-white/20 font-black uppercase tracking-widest mb-2">Availability</p>
-                        <p className="text-xs font-black text-white/60">{product.stock_quantity} Units</p>
+                    <div className="flex justify-between items-center py-8 border-y border-white/5">
+                      <div>
+                          <p className="text-[8px] text-white/20 font-black uppercase tracking-widest mb-2">Value</p>
+                          <p className="text-2xl font-black text-white">Rs. {parseFloat(product.price).toLocaleString()}</p>
+                      </div>
+                      <div className="text-right">
+                          <p className="text-[8px] text-white/20 font-black uppercase tracking-widest mb-2">Availability</p>
+                          <p className="text-xs font-black text-white/60">{product.stock_quantity} Units</p>
+                      </div>
                     </div>
+                    
+                    <motion.button 
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => addToCart(product)} 
+                      disabled={product.stock_quantity <= 0}
+                      className={`w-full py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.5em] transition-all duration-500 ${
+                        product.stock_quantity > 0 
+                        ? 'bg-transparent text-white border border-white/10 hover:bg-red-600 hover:border-red-600 hover:shadow-[0_15px_40px_rgba(220,38,38,0.3)]' 
+                        : 'bg-white/5 text-white/10 cursor-not-allowed border-none'
+                      }`}
+                    >
+                      {product.stock_quantity > 0 ? "ADD TO CART" : "OUT OF STOCK"}
+                    </motion.button>
                   </div>
-                  
-                  <motion.button 
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => addToCart(product)} 
-                    disabled={product.stock_quantity <= 0}
-                    className={`w-full py-5 rounded-2xl font-black uppercase text-[11px] tracking-[0.5em] transition-all duration-500 ${
-                      product.stock_quantity > 0 
-                      ? 'bg-transparent text-white border border-white/10 hover:bg-red-600 hover:border-red-600 hover:shadow-[0_15px_40px_rgba(220,38,38,0.3)]' 
-                      : 'bg-white/5 text-white/10 cursor-not-allowed border-none'
-                    }`}
-                  >
-                    {product.stock_quantity > 0 ? "ADD TO CART" : "OUT OF STOCK"}
-                  </motion.button>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </AnimatePresence>
         )}
       </main>
 
