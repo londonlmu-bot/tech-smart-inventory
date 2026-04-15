@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 // Importing Framer Motion for cinematic component transitions
 import { motion } from 'framer-motion';
+// Importing SweetAlert2 for professional high-fidelity notifications
+import Swal from 'sweetalert2';
 
 /**
  * RegisterPage Component
@@ -46,8 +48,21 @@ export default function RegisterPage() {
       const data = await response.json();
 
       if (data.success) {
-        alert("REGISTRY INITIALIZED. REDIRECTING TO LOGIN.");
-        router.push('/login'); 
+        // SUCCESS ALERT: Custom SweetAlert2 for high-end UI feel
+        Swal.fire({
+          title: 'REGISTRY INITIALIZED',
+          text: 'Redirecting to secure login terminal.',
+          icon: 'success',
+          background: '#0a0a0a',
+          color: '#fff',
+          confirmButtonColor: '#dc2626',
+          iconColor: '#dc2626',
+          customClass: {
+            popup: 'rounded-[2rem] border border-white/10 shadow-2xl font-sans'
+          }
+        }).then(() => {
+          router.push('/login'); 
+        });
       } else {
         setError(data.error || "REGISTRY FAILED: USER ALREADY LOGGED.");
       }

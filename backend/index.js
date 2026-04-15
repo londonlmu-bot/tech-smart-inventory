@@ -76,6 +76,52 @@ app.post('/api/login', async (req, res) => {
     } catch (err) { res.status(500).json({ error: "Core System Malfunction" }); }
 });
 
+// --- PERSONNEL MANAGEMENT PROTOCOLS (ADMIN ONLY) ---
+
+/**
+ * FETCH ALL USERS
+ * Retrieves the complete personnel registry for administrative review.
+ */
+app.get('/api/users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, name, email, role FROM users ORDER BY id DESC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch personnel registry." });
+    }
+});
+
+/**
+ * UPDATE USER IDENTITY
+ * Modifies specific personnel data (Name, Email, Role) based on ID.
+ */
+app.put('/api/users/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, email, role } = req.body;
+    try {
+        await pool.query(
+            'UPDATE users SET name = $1, email = $2, role = $3 WHERE id = $4',
+            [name, email, role, id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: "Registry update sequence failed." });
+    }
+});
+
+/**
+ * TERMINATE USER ACCESS
+ * Permanently removes a personnel profile from the registry.
+ */
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        await pool.query('DELETE FROM users WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: "Termination failed: User might be linked to active orders." });
+    }
+});
+
 // --- INTELLIGENCE & ANALYTICS ENDPOINTS ---
 
 app.get('/api/admin-stats', async (req, res) => {

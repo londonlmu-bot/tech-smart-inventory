@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 // Importing Framer Motion for list animations and smooth UI transitions
 import { motion, AnimatePresence } from 'framer-motion';
+// Importing SweetAlert2 for high-end cinematic notifications
+import Swal from 'sweetalert2';
 
 /**
  * CartPage Component
@@ -44,9 +46,20 @@ export default function CartPage() {
    */
   const handleFinalCheckout = async () => {
     // Security Guard: Ensure user is authorized
-    if (!user) return alert("SECURITY: Please login to finalize acquisition.");
+    if (!user) {
+      Swal.fire({
+        title: 'SECURITY ACCESS DENIED',
+        text: 'Please login to finalize acquisition.',
+        icon: 'warning',
+        background: '#0a0a0a',
+        color: '#fff',
+        confirmButtonColor: '#dc2626'
+      });
+      return;
+    }
+    
     // Stream Check: Ensure cart is not null
-    if (cart.length === 0) return alert("EMPTY_STREAM: No hardware detected in cart.");
+    if (cart.length === 0) return;
 
     setIsProcessing(true);
     try {
@@ -64,14 +77,33 @@ export default function CartPage() {
         });
       }
       
-      alert("ACQUISITION COMPLETE: Your MSI components are being deployed.");
+      // SUCCESS ALERT: Custom SweetAlert2 for high-end UI feel
+      Swal.fire({
+        title: 'ACQUISITION COMPLETE',
+        text: 'Your MSI components are being deployed.',
+        icon: 'success',
+        background: '#0a0a0a',
+        color: '#fff',
+        confirmButtonColor: '#dc2626', // MSI Red
+        iconColor: '#dc2626',
+        customClass: {
+          popup: 'rounded-[2rem] border border-white/10 shadow-2xl font-sans'
+        }
+      });
       
       // Post-transaction cleanup
       setCart([]);
       localStorage.removeItem('cart');
       router.push('/profile'); // Redirect to profile to track order status
     } catch (err) {
-      alert("CORE_ERROR: Transaction synchronization failed.");
+      Swal.fire({
+        title: 'CORE ERROR',
+        text: 'Transaction synchronization failed.',
+        icon: 'error',
+        background: '#0a0a0a',
+        color: '#fff',
+        confirmButtonColor: '#dc2626'
+      });
     } finally {
       setIsProcessing(false);
     }

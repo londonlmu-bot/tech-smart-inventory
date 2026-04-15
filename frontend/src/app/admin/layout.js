@@ -48,11 +48,12 @@ export default function AdminLayout({ children }) {
     window.location.href = '/login'; 
   };
 
-  // Tactical Navigation modules (Including Intelligence Engine/AI Forecast)
+  // Tactical Navigation modules (Updated with Users Registry)
   const menuItems = [
     { name: 'Dashboard', path: '/admin' },
     { name: 'Inventory', path: '/admin/inventory' },
     { name: 'Orders History', path: '/admin/orders' },
+    { name: 'Users', path: '/admin/users' }, // ADDED: Access link for Personnel Registry
     { name: 'AI Forecast', path: '/admin/ai-forecast' }, 
   ];
 
