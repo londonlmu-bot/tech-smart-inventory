@@ -101,7 +101,7 @@ export default function ProfilePage() {
         <Link href="/" className="flex items-center space-x-3 group">
           <div className="w-1.5 h-6 bg-red-600 group-hover:h-8 transition-all shadow-[0_0_10px_#dc2626]"></div>
           <span className="text-2xl font-black tracking-tighter italic uppercase">
-            MSI <span className="text-red-600">INTEL</span>
+            TECH <span className="text-red-600">INTEL</span>
           </span>
         </Link>
         <Link href="/" className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] hover:text-red-500 transition-all border border-white/10 px-6 py-2 rounded-full">
